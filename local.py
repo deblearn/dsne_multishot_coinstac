@@ -140,19 +140,22 @@ def local_2(args):
     local_Shared_Y = local_Y[:local_sharedRows, :]
     local_Shared_IY = local_IY[:local_sharedRows, :]
     meanValue = (np.mean(local_Y, 0))
+    local_Y_labels = np.loadtxt('test/input/simulatorRun/site1_y.txt')  ## there is problem here
 
-
-
-    ## there is problem here
-    computation_output = {
-        "output": {
-            "MeanX": meanValue[0],
-            "MeanY": meanValue[1],
-            "error": C,
-            "local_Shared_iY": local_Shared_IY.tolist(),
-            "local_Shared_Y": local_Shared_Y.tolist(),
-            "computation_phase": "local_2"
+    if iter > 2:
+        local_Y_labels = np.loadtxt('test/input/simulatorRun/site1_y.txt')  ## there is problem here
+        computation_output = {
+            "output": {
+                "MeanX": meanValue[0],
+                "MeanY": meanValue[1],
+                "error": C,
+                "local_Shared_iY": local_Shared_IY.tolist(),
+                "local_Shared_Y": local_Shared_Y.tolist(),
+                "local_Y": local_Y[local_sharedRows:, :].tolist(),
+                "local_Y_labels": local_Y_labels.tolist(),
+                "computation_phase": "local_2"
         },
+
         "cache": {
             "local_Y": local_Y.tolist(),
             "local_dY": local_dY.tolist(),
@@ -163,7 +166,32 @@ def local_2(args):
             "shared_rows": sharedRows,
             "shared_y": local_Shared_Y.tolist()
         }
-    }
+        }
+
+    ## there is problem here
+    else:
+        computation_output = {
+            "output": {
+                "MeanX": meanValue[0],
+                "MeanY": meanValue[1],
+                "error": C,
+                "local_Shared_iY": local_Shared_IY.tolist(),
+                "local_Shared_Y": local_Shared_Y.tolist(),
+                "local_Y": local_Y[local_sharedRows:, :].tolist(),
+                "local_Y_labels": local_Y_labels.tolist(),
+                "computation_phase": "local_2"
+            },
+            "cache": {
+                "local_Y": local_Y.tolist(),
+                "local_dY": local_dY.tolist(),
+                "local_iY": local_IY.tolist(),
+                "local_P": P.tolist(),
+                "local_n": n,
+                "local_gains": local_gains.tolist(),
+                "shared_rows": sharedRows,
+                "shared_y": local_Shared_Y.tolist()
+            }
+        }
 
 
     return json.dumps(computation_output)
@@ -179,7 +207,7 @@ if __name__ == '__main__':
 
     parsed_args = json.loads(sys.argv[1])
     phase_key = list(listRecursive(parsed_args, 'computation_phase'))
-    
+
 
 
     if not phase_key:

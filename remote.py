@@ -143,12 +143,13 @@ def remote_3(args):
 
     Y = meanY + meaniY
 
-    #raise Exception(Y.shape, average_Y.shape)
+
     Y -= np.tile(average_Y, (Y.shape[0], 1))
 
     compAvgError = {'avgX': average_Y[0], 'avgY': average_Y[1], 'error': C}
 
-
+    if(iteration == 6):
+        raise Exception('In remote_3 after iterations 6')
 
     if(iteration<10):
         phase = 'remote_2';
@@ -156,20 +157,50 @@ def remote_3(args):
         phase = 'remote_3';
 
 
+    if iteration == 5:
+        shared_labels = np.loadtxt('test/input/simulatorRun/shared_y.txt')
+        concat_Y = []
+        concat_local_Y_labels = []
+
+        concat_Y.append(Y)
+        concat_local_Y_labels.append(shared_labels)
+        #concat_local_Y_labels =  np.concatenate(concat_local_Y_labels,shared_labels)
 
 
+        for site in args["input"]:
+            #raise Exception(type(args["input"][site]["local_Y"]))
+            #concat_Y.np.concatenate(args['input'][site]["local_Y"])
+            concat_Y.append(args["input"][site]["local_Y"])
+            concat_local_Y_labels.append(args["input"][site]["local_Y_labels"])
 
-    computation_output = {"output": {
-                            "compAvgError": compAvgError,
-                            "number_of_iterations": 0,
-                            "shared_Y": Y.tolist(),
-                            "computation_phase": phase},
+            #np.concatenate( (concat_Y, args['input'][site]["local_Y"]),  axis=0 )
+            #np.concatenate((concat_local_Y_labels, args["input"][site]["local_Y_labels"]), axis=0)
+            #concat_local_Y_labels.np.concatenate(args["input"][site]["local_Y_labels"])
 
-                            "cache": {
+        filepath = 'test/remote/output/simulatorRun/lowdimembed.txt'
+        f = open(filepath, 'w+')
+        for line1, line2 in zip(concat_Y, concat_local_Y_labels):
+            f.writelines(([ str(line1), str(line2)]))
+        f.close()
+        #concat_Y =  [int(i) for i in concat_Y]
+        #concat_local_Y_labels = [int(j) for j in concconcat_local_Y_labelsat_Y]
+
+        raise Exception( concat_Y, concat_local_Y_labels)
+
+
+    else:
+
+        computation_output = {"output": {
                                 "compAvgError": compAvgError,
-                                "number_of_iterations": iteration
+                                "number_of_iterations": 0,
+                                "shared_Y": Y.tolist(),
+                                "computation_phase": phase},
+
+                                "cache": {
+                                    "compAvgError": compAvgError,
+                                    "number_of_iterations": iteration
+                                }
                             }
-                        }
 
 
     return json.dumps(computation_output)
